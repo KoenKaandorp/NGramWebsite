@@ -3,73 +3,163 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>N-gram Text Lab</title>
+  <title>N-Gram Oracle</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="bg-orb orb-1"></div>
-  <div class="bg-orb orb-2"></div>
-  <div class="bg-grid"></div>
+  <div class="noise"></div>
+  <div class="scanlines"></div>
+  <div class="bg-orb orb-a"></div>
+  <div class="bg-orb orb-b"></div>
+  <div class="bg-orb orb-c"></div>
+  <div class="grid-glow"></div>
 
-  <main class="app-shell">
-    <section class="hero">
-      <div class="badge">AI Language Playground</div>
-      <h1>
-        Backoff <span>N-gram</span><br />
-        Text Generator
-      </h1>
-      <p class="subtitle">
-        Seed a phrase and let your language model continue it — or generate
-        something completely unexpected.
-      </p>
-    </section>
-
-    <section class="generator-card">
-      <div class="card-top">
-        <div>
-          <p class="eyebrow">Prompt Input</p>
-          <h2>Start with a phrase</h2>
+  <main class="app">
+    <section class="hero-panel glass">
+      <div class="hero-topbar">
+        <div class="hero-badge">
+          <span class="dot"></span>
+          Neural Language Artifact
         </div>
-        <div class="status-wrap">
-          <span id="modelStatus" class="status loading">Loading model...</span>
+        <div id="modelStatus" class="status-pill loading">Loading model...</div>
+      </div>
+
+      <div class="hero-content">
+        <p class="eyebrow">Experimental Text Synthesis Interface</p>
+        <h1>
+          N-Gram <span>Oracle</span>
+        </h1>
+        <p class="hero-subtitle">
+          Feed the machine a fragment of language and watch it hallucinate the
+          statistically inevitable.
+        </p>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat-card">
+          <span class="stat-label">Engine</span>
+          <span class="stat-value">Backoff</span>
         </div>
-      </div>
-
-      <div class="input-wrap">
-        <label for="inputText">Optional sentence starter</label>
-        <textarea
-          id="inputText"
-          placeholder="e.g. the future of music is..."
-        ></textarea>
-      </div>
-
-      <div class="buttons">
-        <button class="primary" onclick="generateFromInput()">
-          <span>Continue Sentence</span>
-        </button>
-        <button class="secondary" onclick="generateRandom()">
-          <span>Generate Random</span>
-        </button>
-      </div>
-
-      <div class="tips">
-        <span>Try short prompts</span>
-        <span>•</span>
-        <span>Works best with natural language</span>
+        <div class="stat-card">
+          <span class="stat-label">Inference</span>
+          <span class="stat-value">Weighted</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Chaos Level</span>
+          <span class="stat-value" id="chaosValue">89%</span>
+        </div>
       </div>
     </section>
 
-    <section class="output-card">
-      <div class="output-header">
-        <div>
-          <p class="eyebrow">Generated Output</p>
-          <h2>Your result</h2>
-        </div>
-        <button class="ghost" onclick="copyResult()">Copy</button>
+    <section class="workspace">
+      <div class="left-column">
+        <section class="control-panel glass">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Input Console</p>
+              <h2>Seed the prediction engine</h2>
+            </div>
+            <div class="mini-tag">LIVE</div>
+          </div>
+
+          <label for="inputText" class="label">Prompt fragment</label>
+          <div class="textarea-shell">
+            <textarea
+              id="inputText"
+              placeholder="e.g. the city was silent until..."
+            ></textarea>
+          </div>
+
+          <div class="prompt-chips">
+            <button class="chip" onclick="fillPrompt('the future of art is')">the future of art is</button>
+            <button class="chip" onclick="fillPrompt('in the middle of the night')">in the middle of the night</button>
+            <button class="chip" onclick="fillPrompt('the algorithm decided to')">the algorithm decided to</button>
+            <button class="chip" onclick="fillPrompt('once upon a dataset')">once upon a dataset</button>
+          </div>
+
+          <div class="slider-panel">
+            <div class="slider-head">
+              <span>Generation drama</span>
+              <span id="dramaLabel">Maximum</span>
+            </div>
+            <input type="range" min="1" max="100" value="89" id="dramaSlider" />
+          </div>
+
+          <div class="button-row">
+            <button class="mega-btn primary" onclick="generateFromInput()">
+              <span class="btn-title">Continue Sentence</span>
+              <span class="btn-sub">Extend the prompt</span>
+            </button>
+            <button class="mega-btn secondary" onclick="generateRandom()">
+              <span class="btn-title">Generate Random</span>
+              <span class="btn-sub">Start from the void</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="history-panel glass">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Session Archive</p>
+              <h2>Recent generations</h2>
+            </div>
+            <button class="ghost-btn" onclick="clearHistory()">Clear</button>
+          </div>
+          <div id="historyList" class="history-list">
+            <div class="history-empty">No generations yet. Wake the machine.</div>
+          </div>
+        </section>
       </div>
 
-      <div class="result-box" id="resultBox">
-        <p id="result">Your generated sentence will appear here.</p>
+      <div class="right-column">
+        <section class="output-panel glass">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Prediction Output</p>
+              <h2>Machine prophecy</h2>
+            </div>
+            <button class="ghost-btn" onclick="copyResult()">Copy</button>
+          </div>
+
+          <div class="result-frame">
+            <div class="result-glow"></div>
+            <p id="result">Your generated sentence will appear here.</p>
+          </div>
+
+          <div class="telemetry-grid">
+            <div class="telemetry-card">
+              <span class="telemetry-label">Token Pulse</span>
+              <span class="telemetry-value" id="tokenPulse">--</span>
+            </div>
+            <div class="telemetry-card">
+              <span class="telemetry-label">Entropy Vibe</span>
+              <span class="telemetry-value" id="entropyVibe">Chaotic</span>
+            </div>
+            <div class="telemetry-card">
+              <span class="telemetry-label">Length</span>
+              <span class="telemetry-value" id="outputLength">0</span>
+            </div>
+            <div class="telemetry-card">
+              <span class="telemetry-label">Oracle Mood</span>
+              <span class="telemetry-value" id="oracleMood">Dormant</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="system-panel glass">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">System Theater</p>
+              <h2>Absolutely unnecessary diagnostics</h2>
+            </div>
+          </div>
+
+          <div class="system-log" id="systemLog">
+            <div class="log-line">[boot] initializing oracle interface...</div>
+            <div class="log-line">[core] awaiting model load...</div>
+            <div class="log-line">[status] chaos threshold nominal.</div>
+          </div>
+        </section>
       </div>
     </section>
   </main>
