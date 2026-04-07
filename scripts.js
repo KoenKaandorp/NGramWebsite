@@ -1,24 +1,11 @@
 let model = {};
 let maxN = 5;
-let historyItems = [];
+let isGenerating = false;
 
-const resultEl = () => document.getElementById("result");
-const statusEl = () => document.getElementById("modelStatus");
-const historyListEl = () => document.getElementById("historyList");
-const resultFrameEl = () => document.querySelector(".result-frame");
-const systemLogEl = () => document.getElementById("systemLog");
-const chaosValueEl = () => document.getElementById("chaosValue");
-const dramaSliderEl = () => document.getElementById("dramaSlider");
-const dramaLabelEl = () => document.getElementById("dramaLabel");
-const tokenPulseEl = () => document.getElementById("tokenPulse");
-const entropyVibeEl = () => document.getElementById("entropyVibe");
-const outputLengthEl = () => document.getElementById("outputLength");
-const oracleMoodEl = () => document.getElementById("oracleMood");
+const textEl = () => document.getElementById("inputText");
 
 async function loadModel() {
   try {
-    setStatus("Loading model...", "loading");
-    addLog("[fetch] requesting model.json...");
     toggleButtons(true);
 
     const response = await fetch("model.json");
@@ -38,17 +25,10 @@ async function loadModel() {
       }
     }
 
-    setStatus("Model ready", "ready");
-    addLog("[ready] language matrix online.");
-    addLog("[status] prediction engine stabilized.");
-    oracleMoodEl().innerText = "Awakened";
     toggleButtons(false);
   } catch (error) {
     console.error(error);
-    setStatus("Model failed", "error");
-    addLog("[error] failed to initialize model.");
-    resultEl().innerText = "Could not load model.json. Make sure it is in the same folder.";
-    oracleMoodEl().innerText = "Corrupted";
+    textEl().value = "Could not load model.json. Make sure it is in the same folder.";
   }
 }
 
@@ -67,10 +47,10 @@ function weightedRandomChoice(options) {
   return words[words.length - 1];
 }
 
-function backoffInference(maxN, currentWords) {
-  let result = [...currentWords];
+function backoffInference(maxN, currentWords, maxGenerated = 30) {
+  let generatedOnly = [];
 
-  while (true) {
+  while (generatedOnly.length < maxGenerated) {
     let nextWord = null;
 
     for (let n = maxN; n > 0; n--) {
@@ -87,205 +67,132 @@ function backoffInference(maxN, currentWords) {
       }
     }
 
-    if (!nextWord) break;
+    if (!nextWord || nextWord === "</s>") break;
 
-    result.push(nextWord);
-    if (nextWord === "</s>") break;
-
+    generatedOnly.push(nextWord);
     currentWords.push(nextWord);
-
-    if (result.length > 60) break;
   }
 
-  return result;
+  return generatedOnly;
 }
 
-function formatSentence(words) {
-  let filtered = words.filter(w => w !== "<s>" && w !== "</s>");
-  if (filtered.length === 0) return "";
+function formatWords(words) {
+  if (words.length === 0) return "";
 
-  let sentence = "";
-  for (let i = 0; i < filtered.length; i++) {
-    const word = filtered[i];
-    const noSpaceBefore = [".", ",", "!", "?", ":", ";"];
+  let text = "";
+  const noSpaceBefore = [".", ",", "!", "?", ":", ";"];
 
-    if (i === 0) sentence += word;
-    else if (noSpaceBefore.includes(word)) sentence += word;
-    else sentence += " " + word;
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+
+    if (i === 0) {
+      text += word;
+    } else if (noSpaceBefore.includes(word)) {
+      text += word;
+    } else {
+      text += " " + word;
+    }
   }
 
-  sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
-
-  if (!/[.!?]$/.test(sentence)) sentence += ".";
-  return sentence;
-}
-
-function setStatus(text, type) {
-  const el = statusEl();
-  el.textContent = text;
-  el.className = `status-pill ${type}`;
+  return text;
 }
 
 function toggleButtons(disabled) {
   document.querySelectorAll(".mega-btn").forEach(btn => btn.disabled = disabled);
 }
 
-function fillPrompt(text) {
-  document.getElementById("inputText").value = text;
+function clearText() {
+  if (isGenerating) return;
+  textEl().value = "";
+  textEl().focus();
 }
 
-function animateResult(text) {
-  const frame = resultFrameEl();
-  resultEl().innerText = "";
-  frame.classList.remove("reveal");
-  void frame.offsetWidth;
-  frame.classList.add("reveal");
-
-  typewriter(text, resultEl());
-  updateTelemetry(text);
-  addHistory(text);
+function getLastWords(text, count = maxN - 1) {
+  return text
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(-count)
+    .map(w => w.toLowerCase());
 }
 
-function typewriter(text, element) {
-  let i = 0;
-  element.innerText = "";
-  const speed = 14;
+async function typeAppend(textToAppend) {
+  const textarea = textEl();
+  const speed = 28;
 
-  const interval = setInterval(() => {
-    element.innerText += text.charAt(i);
-    i++;
-    if (i >= text.length) clearInterval(interval);
-  }, speed);
-}
+  textarea.classList.add("generating");
 
-function updateTelemetry(text) {
-  const words = text.trim().split(/\s+/).filter(Boolean);
-  const tokenCount = words.length;
-  const chaos = parseInt(dramaSliderEl().value);
-
-  tokenPulseEl().innerText = `${Math.max(12, Math.min(99, tokenCount * 3))}%`;
-  outputLengthEl().innerText = `${tokenCount} tokens`;
-
-  if (chaos > 80) entropyVibeEl().innerText = "Unhinged";
-  else if (chaos > 55) entropyVibeEl().innerText = "Volatile";
-  else if (chaos > 30) entropyVibeEl().innerText = "Stable";
-  else entropyVibeEl().innerText = "Restrained";
-
-  if (tokenCount > 18) oracleMoodEl().innerText = "Visionary";
-  else if (tokenCount > 10) oracleMoodEl().innerText = "Engaged";
-  else oracleMoodEl().innerText = "Focused";
-}
-
-function addHistory(text) {
-  historyItems.unshift(text);
-  historyItems = historyItems.slice(0, 8);
-  renderHistory();
-}
-
-function renderHistory() {
-  const historyEl = historyListEl();
-
-  if (historyItems.length === 0) {
-    historyEl.innerHTML = `<div class="history-empty">No generations yet. Wake the machine.</div>`;
-    return;
+  for (let i = 0; i < textToAppend.length; i++) {
+    textarea.value += textToAppend[i];
+    textarea.scrollTop = textarea.scrollHeight;
+    await new Promise(resolve => setTimeout(resolve, speed));
   }
 
-  historyEl.innerHTML = historyItems
-    .map(item => `<div class="history-item" onclick="reuseHistory(this)">${item}</div>`)
-    .join("");
+  textarea.classList.remove("generating");
 }
 
-function reuseHistory(el) {
-  const text = el.innerText;
-  document.getElementById("inputText").value = text;
-  addLog("[archive] restored previous prophecy to prompt field.");
-}
+async function generateFromInput() {
+  if (isGenerating) return;
+  if (!model || Object.keys(model).length === 0) return;
 
-function clearHistory() {
-  historyItems = [];
-  renderHistory();
-  addLog("[archive] session archive purged.");
-}
+  const textarea = textEl();
+  const input = textarea.value.trim();
 
-function addLog(message) {
-  const log = systemLogEl();
-  const line = document.createElement("div");
-  line.className = "log-line";
-  line.innerText = message;
-  log.prepend(line);
+  isGenerating = true;
+  toggleButtons(true);
 
-  while (log.children.length > 7) {
-    log.removeChild(log.lastChild);
-  }
-}
+  let startWords;
+  let appendText = "";
 
-function generateFromInput() {
-  const input = document.getElementById("inputText").value.trim();
+  if (input.length === 0) {
+    startWords = Array(maxN - 1).fill("<s>");
+    const generatedWords = backoffInference(maxN, [...startWords]);
+    appendText = formatWords(generatedWords);
 
-  if (!model || Object.keys(model).length === 0) {
-    animateResult("Model not loaded yet...");
-    return;
-  }
+    if (appendText.length > 0) {
+      appendText = appendText.charAt(0).toUpperCase() + appendText.slice(1);
+      if (!/[.!?]$/.test(appendText)) appendText += ".";
+    }
 
-  let startWords = input.length === 0
-    ? Array(maxN - 1).fill("<s>")
-    : input.toLowerCase().split(/\s+/);
+    textarea.value = "";
+  } else {
+    startWords = getLastWords(input);
+    const generatedWords = backoffInference(maxN, [...startWords]);
+    appendText = formatWords(generatedWords);
 
-  addLog(`[input] seeded with ${startWords.length} token(s).`);
-
-  const generated = backoffInference(maxN, startWords);
-  const formatted = formatSentence(generated);
-
-  animateResult(formatted || "No output could be generated.");
-  addLog("[output] prophecy emitted successfully.");
-}
-
-function generateRandom() {
-  if (!model || Object.keys(model).length === 0) {
-    animateResult("Model not loaded yet...");
-    return;
+    if (appendText.length > 0) {
+      appendText = input.endsWith(" ") ? appendText : " " + appendText;
+    }
   }
 
-  addLog("[random] initiating void-born generation.");
+  await typeAppend(appendText);
+
+  isGenerating = false;
+  toggleButtons(false);
+}
+
+async function generateRandom() {
+  if (isGenerating) return;
+  if (!model || Object.keys(model).length === 0) return;
+
+  isGenerating = true;
+  toggleButtons(true);
+
+  const textarea = textEl();
   const startWords = Array(maxN - 1).fill("<s>");
-  const generated = backoffInference(maxN, startWords);
-  const formatted = formatSentence(generated);
+  const generatedWords = backoffInference(maxN, [...startWords]);
+  let formatted = formatWords(generatedWords);
 
-  animateResult(formatted || "No output could be generated.");
-  addLog("[output] random prophecy completed.");
-}
-
-async function copyResult() {
-  const text = resultEl().innerText.trim();
-  if (!text || text === "Your generated sentence will appear here.") return;
-
-  try {
-    await navigator.clipboard.writeText(text);
-    const btn = document.querySelector(".ghost-btn");
-    const original = btn.textContent;
-    btn.textContent = "Copied";
-    addLog("[clipboard] output copied.");
-    setTimeout(() => {
-      btn.textContent = original;
-    }, 1200);
-  } catch (err) {
-    console.error("Copy failed", err);
-    addLog("[clipboard] copy failed.");
+  if (formatted.length > 0) {
+    formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+    if (!/[.!?]$/.test(formatted)) formatted += ".";
   }
+
+  textarea.value = "";
+  await typeAppend(formatted);
+
+  isGenerating = false;
+  toggleButtons(false);
 }
 
-function updateDramaUI() {
-  const val = parseInt(dramaSliderEl().value);
-  chaosValueEl().innerText = `${val}%`;
-
-  if (val > 80) dramaLabelEl().innerText = "Maximum";
-  else if (val > 55) dramaLabelEl().innerText = "High";
-  else if (val > 30) dramaLabelEl().innerText = "Moderate";
-  else dramaLabelEl().innerText = "Contained";
-}
-
-window.onload = () => {
-  loadModel();
-  dramaSliderEl().addEventListener("input", updateDramaUI);
-  updateDramaUI();
-};
+window.onload = loadModel;
