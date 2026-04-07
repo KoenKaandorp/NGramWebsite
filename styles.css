@@ -436,13 +436,15 @@ textarea.generating {
     background: linear-gradient(to top, var(--ember-dim), var(--gold));
     opacity: 0.65;
     border-radius: 1px 1px 0 0;
-    transition: height 0.4s ease, opacity 0.4s ease;
-    cursor: help;
+    transition: height 0.4s ease, opacity 0.4s ease, transform 0.15s ease;
 }
 
 .depth-bar:hover {
     opacity: 1;
-    box-shadow: 0 0 6px var(--gold);
+    transform: translateY(-2px) scaleY(1.05);
+    box-shadow:
+        0 0 8px var(--gold),
+        0 0 16px rgba(201, 168, 76, 0.25);
 }
 
 /* ========================================
@@ -883,20 +885,42 @@ textarea.generating {
 }
 
 .made-by {
-  margin-top: 8px;
-  font-family: 'EB Garamond', serif;
-  font-size: 11px;
-  color: var(--text-dim);
-  opacity: 0.6;
+    margin-top: 8px;
+    font-family: 'EB Garamond', serif;
+    font-size: 11px;
+    color: var(--text-dim);
+    opacity: 0.6;
 }
 
 .made-by a {
-  color: var(--gold-dim);
-  text-decoration: none;
-  transition: all 0.3s ease;
+    color: var(--gold-dim);
+    text-decoration: none;
+    transition: all 0.3s ease;
 }
 
 .made-by a:hover {
-  color: var(--gold);
-  text-shadow: 0 0 6px var(--gold);
+    color: var(--gold);
+    text-shadow: 0 0 6px var(--gold);
+}
+
+.depth-tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: rgba(10, 9, 21, 0.95);
+    border: 1px solid var(--border-gold);
+    color: var(--text-parchment);
+    font-family: 'EB Garamond', serif;
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 3px;
+    opacity: 0;
+    transform: translate(-50%, -120%);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    white-space: nowrap;
+    z-index: 10;
+    box-shadow: 0 0 12px rgba(201, 168, 76, 0.15);
+}
+
+.depth-tooltip strong {
+    color: var(--gold);
 }

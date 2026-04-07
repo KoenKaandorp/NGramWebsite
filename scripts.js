@@ -301,11 +301,29 @@ function renderDepthViz(wordObjs) {
     if (!container) return;
     container.innerHTML = "";
 
+    const tooltip = document.getElementById("depthTooltip");
+
     wordObjs.forEach(obj => {
         const bar = document.createElement("div");
         bar.className = "depth-bar";
         bar.style.height = ((obj.depth / maxN) * 100) + "%";
-        bar.title = `"${obj.word}" — n=${obj.depth}`;
+        bar.dataset.word = obj.word;
+        bar.dataset.depth = obj.depth;
+
+        bar.addEventListener("mouseenter", () => {
+            tooltip.innerHTML = `<strong>${obj.word}</strong> · depth ${obj.depth}`;
+            tooltip.style.opacity = 1;
+        });
+
+        bar.addEventListener("mousemove", (e) => {
+            tooltip.style.left = e.pageX + "px";
+            tooltip.style.top = e.pageY + "px";
+        });
+
+        bar.addEventListener("mouseleave", () => {
+            tooltip.style.opacity = 0;
+        });
+
         container.appendChild(bar);
     });
 }
