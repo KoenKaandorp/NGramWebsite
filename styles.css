@@ -915,7 +915,7 @@ textarea.generating {
     padding: 6px 10px;
     border-radius: 3px;
     opacity: 0;
-    transform: translate(-50%, -450%);
+    transform: translate(-50%, -120%);
     transition: opacity 0.2s ease, transform 0.2s ease;
     white-space: nowrap;
     z-index: 9999; 

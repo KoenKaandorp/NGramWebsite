@@ -316,8 +316,8 @@ function renderDepthViz(wordObjs) {
         });
 
         bar.addEventListener("mousemove", (e) => {
-            tooltip.style.left = e.pageX + "px";
-            tooltip.style.top = e.pageY + "px";
+            tooltip.style.left = e.clientX + "px";
+            tooltip.style.top = e.clientY + "px";
         });
 
         bar.addEventListener("mouseleave", () => {
