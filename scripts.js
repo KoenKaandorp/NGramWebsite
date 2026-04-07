@@ -66,31 +66,31 @@ function backoffInference(maxN, currentWords, maxGenerated = 30) {
 
       if (modelLevel[key]) {
         nextWord = weightedRandomChoice(modelLevel[key]);
-        usedDepth = n; // 👈 capture depth
+        usedDepth = n;
         break;
       }
     }
 
     if (!nextWord || nextWord === "</s>") break;
 
-    generated.push({
-      word: nextWord,
-      depth: usedDepth
-    });
-
+    generated.push({ word: nextWord, depth: usedDepth });
     currentWords.push(nextWord);
   }
 
   return generated;
 }
+
 function formatWords(wordObjs) {
-  if (wordObjs.length === 0) return "";
+  if (!wordObjs.length) return "";
 
   let text = "";
   const noSpaceBefore = [".", ",", "!", "?", ":", ";"];
 
-  for (let i = 0; i < wordObjs.length; i++) {
-    const word = wordObjs[i].word;
+  // Filter out special tokens like <s>
+  const filtered = wordObjs.filter(obj => obj.word !== "<s>");
+
+  filtered.forEach((obj, i) => {
+    const word = obj.word;
 
     if (i === 0) {
       text += word;
@@ -99,18 +99,14 @@ function formatWords(wordObjs) {
     } else {
       text += " " + word;
     }
-  }
+  });
 
   return text;
 }
 
 function toggleLoadingState(isLoading) {
   document.querySelectorAll(".btn").forEach(btn => btn.disabled = isLoading);
-  if (isLoading) {
-    loadingOverlay().classList.remove("hidden");
-  } else {
-    loadingOverlay().classList.add("hidden");
-  }
+  loadingOverlay().classList.toggle("hidden", !isLoading);
 }
 
 function clearText() {
@@ -120,8 +116,6 @@ function clearText() {
 }
 
 function getLastWords(text, count = maxN - 1) {
-  // Pad punctuation with spaces so they become independent tokens, 
-  // just like the N-gram model expects.
   const tokenizedText = text.replace(/([.,!?;:()])/g, ' $1 ');
 
   return tokenizedText
@@ -133,51 +127,40 @@ function getLastWords(text, count = maxN - 1) {
 }
 
 async function generateFromInput() {
-  if (isGenerating) return;
-  if (!model || Object.keys(model).length === 0) return;
+  if (isGenerating || !Object.keys(model).length) return;
 
   const textarea = textEl();
-  const rawInput = textarea.value; // Keep the raw input to check for trailing spaces
+  const rawInput = textarea.value;
   const input = rawInput.trim();
 
   isGenerating = true;
   toggleLoadingState(true);
 
-  await new Promise(r => setTimeout(r, 600));
+  await new Promise(r => setTimeout(r, 400));
 
   let startWords;
   let appendText = "";
-  let generatedWords = [];
 
-  if (input.length === 0) {
+  if (!input.length) {
     startWords = Array(maxN - 1).fill("<s>");
-  const generated = backoffInference(maxN, [...startWords]);
-const generatedWords = generated.map(g => g.word);
-
-renderDepthViz(generated);
-    appendText = formatWords(generatedWords);
-
-    if (appendText.length > 0) {
-      appendText = appendText.charAt(0).toUpperCase() + appendText.slice(1);
-      if (!/[.!?]$/.test(appendText)) appendText += ".";
-    }
-
-    textarea.value = "";
   } else {
     startWords = getLastWords(input);
+  }
+
   const generated = backoffInference(maxN, [...startWords]);
-const generatedWords = generated.map(g => g.word);
+  renderDepthViz(generated);
 
-renderDepthViz(generated);
-    appendText = formatWords(generatedWords);
+  appendText = formatWords(generated);
 
-    if (appendText.length > 0) {
-      // Check if the user already left a space at the end of their text
+  if (appendText.length > 0) {
+    if (!input.length) {
+      appendText = appendText.charAt(0).toUpperCase() + appendText.slice(1);
+      if (!/[.!?]$/.test(appendText)) appendText += ".";
+      textarea.value = "";
+    } else {
       const needsSpace = !rawInput.match(/\s$/);
-      
-      // Don't add a space if the very first generated token is a punctuation mark
+      const firstToken = generated[0]?.word;
       const noSpaceBefore = [".", ",", "!", "?", ":", ";"];
-      const firstToken = generatedWords[0];
 
       if (needsSpace && !noSpaceBefore.includes(firstToken)) {
         appendText = " " + appendText;
@@ -193,35 +176,32 @@ renderDepthViz(generated);
 
 async function typeAppend(textToAppend) {
   const textarea = textEl();
-  const speed = 3; // Slightly slower to match the ink bleed effect
-
   textarea.classList.add("generating");
 
-  for (let i = 0; i < textToAppend.length; i++) {
-    textarea.value += textToAppend[i];
+  for (let char of textToAppend) {
+    textarea.value += char;
     textarea.scrollTop = textarea.scrollHeight;
-    await new Promise(resolve => setTimeout(resolve, speed));
+    await new Promise(r => setTimeout(r, 3));
   }
 
   textarea.classList.remove("generating");
 }
 
 async function generateRandom() {
-  if (isGenerating) return;
-  if (!model || Object.keys(model).length === 0) return;
+  if (isGenerating || !Object.keys(model).length) return;
 
   isGenerating = true;
   toggleLoadingState(true);
 
-  await new Promise(r => setTimeout(r, 600));
+  await new Promise(r => setTimeout(r, 400));
 
   const textarea = textEl();
   const startWords = Array(maxN - 1).fill("<s>");
-  const generated = backoffInference(maxN, [...startWords]);
-const generatedWords = generated.map(g => g.word);
 
-renderDepthViz(generated);
-  let formatted = formatWords(generatedWords);
+  const generated = backoffInference(maxN, [...startWords]);
+  renderDepthViz(generated);
+
+  let formatted = formatWords(generated);
 
   if (formatted.length > 0) {
     formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1);
@@ -247,7 +227,6 @@ function renderDepthViz(wordObjs) {
     const bar = document.createElement("div");
     bar.className = "depth-bar";
 
-    // Height based on depth
     const heightPercent = (obj.depth / maxDepth) * 100;
     bar.style.height = heightPercent + "%";
 
