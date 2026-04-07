@@ -261,3 +261,22 @@ textarea.generating {
   font-size: 0.95rem;
   font-style: italic;
 }
+
+.depth-viz {
+  display: flex;
+  gap: 3px;
+  margin-top: 15px;
+  height: 40px;
+  align-items: flex-end;
+}
+
+.depth-bar {
+  flex: 1;
+  background: linear-gradient(to top, #5e0e0e, #d4af37);
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.depth-bar:hover {
+  opacity: 1;
+}
