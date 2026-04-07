@@ -1,27 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>N-gram Generator</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>N-gram Text Lab</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-grid"></div>
 
-  <div class="container">
-    <h1>Backoff N-gram Generator</h1>
+  <main class="app-shell">
+    <section class="hero">
+      <div class="badge">AI Language Playground</div>
+      <h1>
+        Backoff <span>N-gram</span><br />
+        Text Generator
+      </h1>
+      <p class="subtitle">
+        Seed a phrase and let your language model continue it — or generate
+        something completely unexpected.
+      </p>
+    </section>
 
-    <textarea id="inputText" placeholder="Start typing a sentence (optional)..."></textarea>
+    <section class="generator-card">
+      <div class="card-top">
+        <div>
+          <p class="eyebrow">Prompt Input</p>
+          <h2>Start with a phrase</h2>
+        </div>
+        <div class="status-wrap">
+          <span id="modelStatus" class="status loading">Loading model...</span>
+        </div>
+      </div>
 
-    <div class="buttons">
-      <button onclick="generateFromInput()">Continue Sentence</button>
-      <button onclick="generateRandom()">Generate Random</button>
-    </div>
+      <div class="input-wrap">
+        <label for="inputText">Optional sentence starter</label>
+        <textarea
+          id="inputText"
+          placeholder="e.g. the future of music is..."
+        ></textarea>
+      </div>
 
-    <div class="output">
-      <h3>Result:</h3>
-      <p id="result">---</p>
-    </div>
-  </div>
+      <div class="buttons">
+        <button class="primary" onclick="generateFromInput()">
+          <span>Continue Sentence</span>
+        </button>
+        <button class="secondary" onclick="generateRandom()">
+          <span>Generate Random</span>
+        </button>
+      </div>
+
+      <div class="tips">
+        <span>Try short prompts</span>
+        <span>•</span>
+        <span>Works best with natural language</span>
+      </div>
+    </section>
+
+    <section class="output-card">
+      <div class="output-header">
+        <div>
+          <p class="eyebrow">Generated Output</p>
+          <h2>Your result</h2>
+        </div>
+        <button class="ghost" onclick="copyResult()">Copy</button>
+      </div>
+
+      <div class="result-box" id="resultBox">
+        <p id="result">Your generated sentence will appear here.</p>
+      </div>
+    </section>
+  </main>
 
   <script src="scripts.js"></script>
 </body>
