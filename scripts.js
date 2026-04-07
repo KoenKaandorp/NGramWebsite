@@ -1,5 +1,5 @@
 let model = {};
-let maxN = 5;
+let maxN = 10;
 let isGenerating = false;
 
 const textEl = () => document.getElementById("inputText");
