@@ -7,7 +7,6 @@ const loadingOverlay = () => document.getElementById("loadingOverlay");
 
 async function loadModel() {
   try {
-    toggleLoadingState(true);
 
     const response = await fetch("model.json");
     if (!response.ok) throw new Error("Failed to load model.json");
@@ -26,11 +25,9 @@ async function loadModel() {
       }
     }
 
-    toggleLoadingState(false);
   } catch (error) {
     console.error(error);
     textEl().value = "The archives are sealed. Could not load model.json.";
-    toggleLoadingState(false);
   }
 }
 
@@ -104,11 +101,6 @@ function formatWords(wordObjs) {
   return text;
 }
 
-function toggleLoadingState(isLoading) {
-  document.querySelectorAll(".btn").forEach(btn => btn.disabled = isLoading);
-  loadingOverlay().classList.toggle("hidden", !isLoading);
-}
-
 function clearText() {
   if (isGenerating) return;
   textEl().value = "";
@@ -134,7 +126,6 @@ async function generateFromInput() {
   const input = rawInput.trim();
 
   isGenerating = true;
-  toggleLoadingState(true);
 
   await new Promise(r => setTimeout(r, 400));
 
@@ -168,7 +159,6 @@ async function generateFromInput() {
     }
   }
 
-  toggleLoadingState(false);
   await typeAppend(appendText);
 
   isGenerating = false;
@@ -191,7 +181,6 @@ async function generateRandom() {
   if (isGenerating || !Object.keys(model).length) return;
 
   isGenerating = true;
-  toggleLoadingState(true);
 
   await new Promise(r => setTimeout(r, 400));
 
@@ -209,7 +198,6 @@ async function generateRandom() {
   }
 
   textarea.value = "";
-  toggleLoadingState(false);
   await typeAppend(formatted);
 
   isGenerating = false;
