@@ -1,110 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Chronicles of the Third Age</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chronicles of the Third Age</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
 </head>
+
 <body>
-  <div class="noise-overlay"></div>
-  <div class="vignette"></div>
+    <div class="noise-overlay"></div>
+    <div class="vignette"></div>
 
-  <canvas id="particleCanvas"></canvas>
+    <canvas id="particleCanvas"></canvas>
 
-  <div class="app">
-    <header class="header">
-      <div class="rune-line top-rune">ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ</div>
-      <div class="header-inner">
-        <div class="eye-of-sauron">
-          <div class="eye-outer"></div>
-          <div class="eye-inner"></div>
-          <div class="eye-pupil"></div>
-          <div class="eye-glow"></div>
-        </div>
-        <div class="header-text">
-          <h1 class="title">Chronicles</h1>
-          <p class="subtitle">of the Third Age</p>
-          <p class="tagline">Speak and let the model enter</p>
-        </div>
-      </div>
-      <div class="rune-line bottom-rune">ᛟᛞᛜᛚᛗᛖᛒᛏᛊᛉᛈᛇᛃᛁᚾᚺᚹᚷᚲᚱᚨᚦᚢᚠ</div>
-    </header>
+    <div class="app">
+        <header class="header">
+            <div class="rune-line top-rune">ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ</div>
+            <div class="header-inner">
+                <div class="eye-of-sauron">
+                    <div class="eye-outer"></div>
+                    <div class="eye-inner"></div>
+                    <div class="eye-pupil"></div>
+                    <div class="eye-glow"></div>
+                </div>
+                <div class="header-text">
+                    <h1 class="title">Chronicles</h1>
+                    <p class="subtitle">of the Third Age</p>
+                    <p class="tagline">Speak and let the model enter</p>
+                </div>
+            </div>
+            <div class="rune-line bottom-rune">ᛟᛞᛜᛚᛗᛖᛒᛏᛊᛉᛈᛇᛃᛁᚾᚺᚹᚷᚲᚱᚨᚦᚢᚠ</div>
+        </header>
 
-    <main class="layout">
-      <section class="scroll-container">
-        <div class="scroll-ornament top-ornament">
-          <div class="ornament-line"></div>
-          <div class="ornament-diamond">◆</div>
-          <div class="ornament-line"></div>
-        </div>
+        <main class="layout">
+            <section class="scroll-container">
+                <div class="scroll-ornament top-ornament">
+                    <div class="ornament-line"></div>
+                    <div class="ornament-diamond">◆</div>
+                    <div class="ornament-line"></div>
+                </div>
 
-        <div class="scroll-label">
-          <span>The Manuscript</span>
-          <button class="clear-btn" onclick="clearText()">
-            <span class="clear-icon">✦</span> Erase
-          </button>
-        </div>
+                <div class="scroll-label">
+                    <span>The Manuscript</span>
+                    <button class="clear-btn" onclick="clearText()">
+                        <span class="clear-icon">✦</span> Erase
+                    </button>
+                </div>
 
-        <div class="scroll-body">
-          <textarea id="inputText" placeholder="Begin your tale, or let the model weave its thread from the void…&#10;&#10;Type something, then press Continue — or press Random&#10;to summon words from the depths of Moria."></textarea>
-        </div>
+                <div class="scroll-body">
+                    <textarea id="inputText"
+                        placeholder="Begin your tale, or let the model weave its thread from the void…&#10;&#10;Type something, then press Continue — or press Random&#10;to summon words from the depths of Moria."></textarea>
+                </div>
 
-        <div id="depthViz" class="depth-viz">
-          <div class="depth-label">Model Confidence</div>
-          <div class="depth-bars"></div>
-        </div>
+                <div id="depthViz" class="depth-viz">
+                    <div class="depth-label">Model Confidence</div>
+                    <div class="depth-bars"></div>
+                </div>
 
-        <div class="scroll-ornament bottom-ornament">
-          <div class="ornament-line"></div>
-          <div class="ornament-diamond">◆</div>
-          <div class="ornament-line"></div>
-        </div>
-      </section>
+                <div class="scroll-ornament bottom-ornament">
+                    <div class="ornament-line"></div>
+                    <div class="ornament-diamond">◆</div>
+                    <div class="ornament-line"></div>
+                </div>
+            </section>
 
-      <aside class="controls-panel">
-        <div class="panel-title">
-          <span class="panel-rune">ᚠ</span>
-          <span>The One Ring</span>
-          <span class="panel-rune">ᚱ</span>
-        </div>
+            <aside class="controls-panel">
+                <div class="panel-title">
+                    <span class="panel-rune">ᚠ</span>
+                    <span>The One Ring</span>
+                    <span class="panel-rune">ᚱ</span>
+                </div>
 
-        <button class="chaos-btn" onclick="generateFromInput()">
-          <span class="chaos-icon">⟡</span>
-          <span class="chaos-text">Finish sentence</span>
-          <span class="chaos-sub">From the springs of Rivendell</span>
-        </button>
+                <button class="chaos-btn" onclick="generateFromInput()">
+                    <span class="chaos-icon">⟡</span>
+                    <span class="chaos-text">Finish sentence</span>
+                    <span class="chaos-sub">From the springs of Rivendell</span>
+                </button>
 
-        <button class="chaos-btn" onclick="generateRandom()">
-          <span class="chaos-icon">⟡</span>
-          <span class="chaos-text">Summon Random</span>
-          <span class="chaos-sub">From the void of Mordor</span>
-        </button>
+                <button class="chaos-btn" onclick="generateRandom()">
+                    <span class="chaos-icon">⟡</span>
+                    <span class="chaos-text">Summon Random</span>
+                    <span class="chaos-sub">From the void of Mordor</span>
+                </button>
 
-        <div class="lore-block">
-          <p class="lore-text">Trained upon the words of Tolkien — the Fellowship, the War of the Ring, the return of the King.</p>
-        </div>
+                <div class="lore-block">
+                    <p class="lore-text">Trained upon the words of Tolkien — the Fellowship, the War of the Ring, the
+                        return of the King.</p>
+                </div>
 
-        <div id="loadingOverlay" class="loading-overlay hidden">
-          <div class="palantir">
-            <div class="palantir-glow"></div>
-            <div class="palantir-inner"></div>
-            <div class="palantir-swirl"></div>
-          </div>
-          <span class="loading-text">The model speaks…</span>
-        </div>
-      </aside>
-    </main>
+                <div id="loadingOverlay" class="loading-overlay hidden">
+                    <div class="palantir">
+                        <div class="palantir-glow"></div>
+                        <div class="palantir-inner"></div>
+                        <div class="palantir-swirl"></div>
+                    </div>
+                    <span class="loading-text">The model speaks…</span>
+                </div>
+            </aside>
+        </main>
 
-    <footer class="footer">
-      <div class="footer-runes">ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ</div>
-      <p>N-Gram Chronicles · Trained on the Lord of the Rings</p>
-    </footer>
-  </div>
+        <footer class="footer">
+            <div class="footer-runes">ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ</div>
+            <p>N-Gram Chronicles · Trained on the Lord of the Rings</p>
+        </footer>
+        <p class="made-by">
+  Made by 
+  <a href="https://koenkaandorp.nl" target="_blank">Koen Kaandorp</a>
+</p>
+    </div>
 
-  <script src="scripts.js"></script>
+    <script src="scripts.js"></script>
 </body>
+
 </html>
