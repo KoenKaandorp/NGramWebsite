@@ -1,29 +1,47 @@
 let model = {};
 let maxN = 5;
 
+const resultEl = () => document.getElementById("result");
+const resultBoxEl = () => document.getElementById("resultBox");
+const statusEl = () => document.getElementById("modelStatus");
+const buttonsEl = () => document.querySelectorAll("button.primary, button.secondary");
+
 // Load model.json
 async function loadModel() {
-  const response = await fetch("model.json");
-  const data = await response.json();
+  try {
+    setStatus("Loading model...", "loading");
+    toggleButtons(true);
 
-  model = {};
-
-  for (const nGramKey in data) {
-    const nValue = parseInt(nGramKey.match(/\d+/)[0]);
-    model[nValue] = {};
-
-    for (const keyStr in data[nGramKey]) {
-      const keyArray = JSON.parse(keyStr);
-      const key = keyArray.join("|||");
-
-      model[nValue][key] = data[nGramKey][keyStr];
+    const response = await fetch("model.json");
+    if (!response.ok) {
+      throw new Error("Failed to load model.json");
     }
-  }
 
-  console.log("Model loaded");
+    const data = await response.json();
+    model = {};
+
+    for (const nGramKey in data) {
+      const nValue = parseInt(nGramKey.match(/\d+/)[0]);
+      model[nValue] = {};
+
+      for (const keyStr in data[nGramKey]) {
+        const keyArray = JSON.parse(keyStr);
+        const key = keyArray.join("|||");
+        model[nValue][key] = data[nGramKey][keyStr];
+      }
+    }
+
+    console.log("Model loaded");
+    setStatus("Model ready", "ready");
+    toggleButtons(false);
+  } catch (error) {
+    console.error(error);
+    setStatus("Failed to load model", "error");
+    resultEl().innerText = "Could not load model.json. Make sure it is in the same folder.";
+  }
 }
 
-// Weighted sampling (same as Python)
+// Weighted sampling
 function weightedRandomChoice(options) {
   const words = Object.keys(options);
   const weights = Object.values(options);
@@ -70,6 +88,9 @@ function backoffInference(maxN, currentWords) {
     if (nextWord === "</s>") break;
 
     currentWords.push(nextWord);
+
+    // Prevent absurdly long output
+    if (result.length > 60) break;
   }
 
   return result;
@@ -77,7 +98,6 @@ function backoffInference(maxN, currentWords) {
 
 // Clean sentence
 function formatSentence(words) {
-  // Remove special tokens
   let filtered = words.filter(w => w !== "<s>" && w !== "</s>");
 
   if (filtered.length === 0) return "";
@@ -86,59 +106,99 @@ function formatSentence(words) {
 
   for (let i = 0; i < filtered.length; i++) {
     const word = filtered[i];
-
-    // Punctuation that should NOT have a space before it
     const noSpaceBefore = [".", ",", "!", "?", ":", ";"];
 
     if (i === 0) {
       sentence += word;
     } else if (noSpaceBefore.includes(word)) {
-      sentence += word; // attach directly
+      sentence += word;
     } else {
       sentence += " " + word;
     }
   }
 
-  // Capitalize first letter
   sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
 
   if (!/[.!?]$/.test(sentence)) {
-  sentence += ".";
-}
+    sentence += ".";
+  }
 
   return sentence;
+}
+
+// UX helpers
+function setStatus(text, type) {
+  const el = statusEl();
+  el.textContent = text;
+  el.className = `status ${type}`;
+}
+
+function toggleButtons(disabled) {
+  buttonsEl().forEach(btn => btn.disabled = disabled);
+}
+
+function animateResult(text) {
+  const result = resultEl();
+  const box = resultBoxEl();
+
+  result.innerText = text;
+  box.classList.remove("generated");
+  void box.offsetWidth;
+  box.classList.add("generated");
 }
 
 // Use user input
 function generateFromInput() {
   const input = document.getElementById("inputText").value.trim();
-  const output = document.getElementById("result");
 
   if (!model || Object.keys(model).length === 0) {
-    output.innerText = "Model not loaded yet...";
+    animateResult("Model not loaded yet...");
     return;
   }
 
   let startWords;
 
   if (input.length === 0) {
-    // fallback to default
     startWords = Array(maxN - 1).fill("<s>");
   } else {
     startWords = input.toLowerCase().split(/\s+/);
   }
 
   const generated = backoffInference(maxN, startWords);
-  output.innerText = formatSentence(generated);
+  const formatted = formatSentence(generated);
+
+  animateResult(formatted || "No output could be generated.");
 }
 
 function generateRandom() {
-  const output = document.getElementById("result");
+  if (!model || Object.keys(model).length === 0) {
+    animateResult("Model not loaded yet...");
+    return;
+  }
 
   const startWords = Array(maxN - 1).fill("<s>");
   const generated = backoffInference(maxN, startWords);
+  const formatted = formatSentence(generated);
 
-  output.innerText = formatSentence(generated);
+  animateResult(formatted || "No output could be generated.");
+}
+
+async function copyResult() {
+  const text = resultEl().innerText.trim();
+
+  if (!text || text === "Your generated sentence will appear here.") return;
+
+  try {
+    await navigator.clipboard.writeText(text);
+    const copyBtn = document.querySelector(".ghost");
+    const original = copyBtn.textContent;
+    copyBtn.textContent = "Copied!";
+    setTimeout(() => {
+      copyBtn.textContent = original;
+    }, 1200);
+  } catch (err) {
+    console.error("Copy failed", err);
+  }
 }
 
 window.onload = loadModel;
