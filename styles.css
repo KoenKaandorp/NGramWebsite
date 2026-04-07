@@ -412,6 +412,7 @@ textarea.generating {
 /* ── Depth Visualizer ── */
 .depth-viz {
     padding: 4px 24px 8px;
+  position: relative;
 }
 
 .depth-label {
@@ -904,7 +905,7 @@ textarea.generating {
 }
 
 .depth-tooltip {
-    position: absolute;
+    position: fixed;
     pointer-events: none;
     background: rgba(10, 9, 21, 0.95);
     border: 1px solid var(--border-gold);
@@ -914,11 +915,10 @@ textarea.generating {
     padding: 6px 10px;
     border-radius: 3px;
     opacity: 0;
-    transform: translate(-50%, -120%);
+    transform: translate(-50%, -450%);
     transition: opacity 0.2s ease, transform 0.2s ease;
     white-space: nowrap;
-    z-index: 10;
-    box-shadow: 0 0 12px rgba(201, 168, 76, 0.15);
+    z-index: 9999; 
 }
 
 .depth-tooltip strong {
