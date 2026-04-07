@@ -1,8 +1,3 @@
-/* ============================================
-   CHRONICLES OF THE THIRD AGE
-   scripts.js — N-Gram model + visual effects
-   ============================================ */
-
 let model = {};
 let maxN = 10;
 let isGenerating = false;
@@ -202,9 +197,19 @@ async function generateFromInput() {
 
   await new Promise(r => setTimeout(r, 400));
 
-  const startWords = input.length
-    ? getLastWords(input)
-    : Array(maxN - 1).fill("<s>");
+let startWords;
+
+if (input.length) {
+  const words = getLastWords(input);
+  const needed = maxN - 1 - words.length;
+
+  startWords = [
+    ...Array(Math.max(0, needed)).fill("<s>"),
+    ...words
+  ];
+} else {
+  startWords = Array(maxN - 1).fill("<s>");
+}
 
   const generated = backoffInference(maxN, [...startWords]);
   renderDepthViz(generated);

@@ -268,8 +268,10 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
   padding: 0 24px 12px;
   font-family: 'Cinzel', serif;
+  top: -16px;
   font-size: 11px;
   letter-spacing: 3px;
   text-transform: uppercase;
