@@ -3,10 +3,11 @@ let maxN = 5;
 let isGenerating = false;
 
 const textEl = () => document.getElementById("inputText");
+const loadingOverlay = () => document.getElementById("loadingOverlay");
 
 async function loadModel() {
   try {
-    toggleButtons(true);
+    toggleLoadingState(true);
 
     const response = await fetch("model.json");
     if (!response.ok) throw new Error("Failed to load model.json");
@@ -25,10 +26,11 @@ async function loadModel() {
       }
     }
 
-    toggleButtons(false);
+    toggleLoadingState(false);
   } catch (error) {
     console.error(error);
-    textEl().value = "Could not load model.json. Make sure it is in the same folder.";
+    textEl().value = "The archives are sealed. Could not load model.json.";
+    toggleLoadingState(false);
   }
 }
 
@@ -97,8 +99,13 @@ function formatWords(words) {
   return text;
 }
 
-function toggleButtons(disabled) {
-  document.querySelectorAll(".mega-btn").forEach(btn => btn.disabled = disabled);
+function toggleLoadingState(isLoading) {
+  document.querySelectorAll(".btn").forEach(btn => btn.disabled = isLoading);
+  if (isLoading) {
+    loadingOverlay().classList.remove("hidden");
+  } else {
+    loadingOverlay().classList.add("hidden");
+  }
 }
 
 function clearText() {
@@ -118,7 +125,7 @@ function getLastWords(text, count = maxN - 1) {
 
 async function typeAppend(textToAppend) {
   const textarea = textEl();
-  const speed = 28;
+  const speed = 35; // Slightly slower to match the ink bleed effect
 
   textarea.classList.add("generating");
 
@@ -139,7 +146,10 @@ async function generateFromInput() {
   const input = textarea.value.trim();
 
   isGenerating = true;
-  toggleButtons(true);
+  toggleLoadingState(true);
+
+  // Small artificial delay to show off the cool "Great Eye" animation
+  await new Promise(r => setTimeout(r, 600));
 
   let startWords;
   let appendText = "";
@@ -165,10 +175,10 @@ async function generateFromInput() {
     }
   }
 
+  toggleLoadingState(false); // Hide spinner before typing
   await typeAppend(appendText);
 
   isGenerating = false;
-  toggleButtons(false);
 }
 
 async function generateRandom() {
@@ -176,7 +186,9 @@ async function generateRandom() {
   if (!model || Object.keys(model).length === 0) return;
 
   isGenerating = true;
-  toggleButtons(true);
+  toggleLoadingState(true);
+
+  await new Promise(r => setTimeout(r, 600));
 
   const textarea = textEl();
   const startWords = Array(maxN - 1).fill("<s>");
@@ -189,10 +201,10 @@ async function generateRandom() {
   }
 
   textarea.value = "";
+  toggleLoadingState(false);
   await typeAppend(formatted);
 
   isGenerating = false;
-  toggleButtons(false);
 }
 
 window.onload = loadModel;

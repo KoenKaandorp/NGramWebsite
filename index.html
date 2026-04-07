@@ -2,52 +2,61 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>N-Gram Oracle</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chronicles of Middle-earth</title>
+
+  <link rel="stylesheet" href="styles.css"/>
+
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Uncial+Antiqua&display=swap" rel="stylesheet">
 </head>
+
 <body>
-  <div class="noise"></div>
-  <div class="scanlines"></div>
-  <div class="bg-orb orb-a"></div>
-  <div class="bg-orb orb-b"></div>
-  <div class="bg-orb orb-c"></div>
-  <div class="grid-glow"></div>
+  <div class="map-background"></div>
+  <div class="vignette"></div>
 
-  <main class="app">
-    <section class="hero">
-      <p class="eyebrow">Experimental Text Synthesis Interface</p>
-      <h1>N-Gram <span>Oracle</span></h1>
-      <p class="hero-subtitle">
-        Begin a sentence and let the model continue it, one word at a time.
+  <main class="container">
+
+    <header class="header">
+      <h1>Chronicles of Middle-earth</h1>
+      <p class="subtitle">
+        A linguistic relic woven from the words of the Three Ages
       </p>
-    </section>
+    </header>
 
-    <section class="composer glass">
-      <div class="composer-top">
-        <p class="composer-label">Write something...</p>
-        <button class="ghost-btn" onclick="clearText()">Clear</button>
+    <section class="panel">
+      <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="great-eye"></div>
+        <p>The Lore is shifting...</p>
       </div>
 
-      <div class="textarea-shell">
-        <textarea
-          id="inputText"
-          placeholder="e.g. the city was silent until..."
-        ></textarea>
+      <div class="panel-header">
+        <h2>Your Passage</h2>
+        <button class="btn subtle" onclick="clearText()">Purge Ink</button>
       </div>
 
-      <div class="button-row">
-        <button class="mega-btn primary" onclick="generateFromInput()">
-          <span class="btn-title">Continue Sentence</span>
-          <span class="btn-sub">Let the oracle finish your thought</span>
+      <textarea
+        id="inputText"
+        placeholder="Begin your tale... (e.g. 'In a hole in the ground...')"
+      ></textarea>
+
+      <div class="controls">
+        <button class="btn primary wax-seal" onclick="generateFromInput()">
+          <span>Continue the Tale</span>
         </button>
 
-        <button class="mega-btn secondary" onclick="generateRandom()">
-          <span class="btn-title">Generate Random</span>
-          <span class="btn-sub">Start from nothing</span>
+        <button class="btn secondary" onclick="generateRandom()">
+          <span>Random Passage</span>
         </button>
       </div>
+
     </section>
+
+    <footer class="footer">
+      <p>
+        Forged from the texts of The Fellowship, The Two Towers, and The Return of the King
+      </p>
+    </footer>
+
   </main>
 
   <script src="scripts.js"></script>
